@@ -7,18 +7,27 @@ let updateIndex = null;
 document.getElementById("addBtn").addEventListener("click", function () {
     let addTxt = document.getElementById("addTxt");
     let addTitle = document.getElementById("addTitle");
+    let addImportant = document.getElementById("addImportant").checked;
+
+    if (addTitle.value === "") {
+        alert("Title cannot be empty");
+        return;
+    }
+
     let notes = localStorage.getItem("notes");
     let notesObj = notes ? JSON.parse(notes) : [];
 
     let myObj = {
         title: addTitle.value,
-        text: addTxt.value
+        text: addTxt.value,
+        important: addImportant
     }
 
     notesObj.push(myObj);
     localStorage.setItem("notes", JSON.stringify(notesObj));
     addTxt.value = "";
     addTitle.value = "";
+    document.getElementById("addImportant").checked = false;
     showNotes();
 });
 
@@ -29,7 +38,7 @@ function showNotes() {
 
     let html = notesObj.map((element, index) => {
         return `
-            <div class="noteCard my-2 mx-2 card" style="width: 18rem;">
+            <div class="noteCard my-2 mx-2 card ${element.important ? 'border-danger' : ''}" style="width: 18rem;">
                 <div class="card-body">
                     <h5 class="card-title">${element.title}</h5>
                     <p class="card-text">${element.text}</p>
@@ -61,19 +70,29 @@ function editNote(index) {
     updateIndex = index;
     document.getElementById("updateTitle").value = notesObj[index].title;
     document.getElementById("updateTxt").value = notesObj[index].text;
+    document.getElementById("updateImportant").checked = notesObj[index].important;
+
     $('#updateModal').modal('show');
 }
 
-// Function to update a note
+// Update note
 document.getElementById("updateBtn").addEventListener("click", function () {
-    let updateTxt = document.getElementById("updateTxt");
-    let updateTitle = document.getElementById("updateTitle");
+    let updateTxt = document.getElementById("updateTxt").value;
+    let updateTitle = document.getElementById("updateTitle").value;
+    let updateImportant = document.getElementById("updateImportant").checked;
+
+    if (updateTitle === "") {
+        alert("Title cannot be empty");
+        return;
+    }
+
     let notes = localStorage.getItem("notes");
     let notesObj = notes ? JSON.parse(notes) : [];
 
     notesObj[updateIndex] = {
-        title: updateTitle.value,
-        text: updateTxt.value
+        title: updateTitle,
+        text: updateTxt,
+        important: updateImportant
     };
 
     localStorage.setItem("notes", JSON.stringify(notesObj));
@@ -85,13 +104,8 @@ document.getElementById('searchTxt').addEventListener("input", function () {
     let inputVal = this.value.toLowerCase();
     let noteCards = document.getElementsByClassName('noteCard');
 
-    Array.from(noteCards).forEach(function (element) {
+    Array.from(noteCards).forEach(element => {
         let cardTxt = element.getElementsByTagName("p")[0].innerText.toLowerCase();
         element.style.display = cardTxt.includes(inputVal) ? "block" : "none";
     });
 });
-
-/*
-Further Features:
-1. Mark a note as Important
-*/
